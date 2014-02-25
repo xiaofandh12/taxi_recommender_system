@@ -1,0 +1,8 @@
+1,pickup_select.py
+	选出一天中所有的pick up点
+2，pickup_select_according_time.py
+	选出一天中某个时间段里的pick up点
+3，pickup_kMeans_clustering.py
+	用k-means对一天中某个时间段里面的pick up点进行聚类
+4，pickup_cluster_0_json.py
+	把某个聚类中的点转化成json格式
