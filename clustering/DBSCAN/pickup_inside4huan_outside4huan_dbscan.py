@@ -1,4 +1,7 @@
 import dbscan
+from datetime import datetime
+import os.path
+import time
 
 #pickups format:[[pickup's track_id, pickup's longitude, pickup's latitude, pickup's time], ... , [...]]
 def load_data(fileName):
@@ -18,7 +21,7 @@ def load_data(fileName):
 
 #use dbscan to cluster the pickups both inside3huan and outside4huan,but with different parameters
 def pickup_inside4huan_outside4huan_dbscan(pickup_file,e_inside4huan,minpts_inside4huan,e_outside4huan,minpts_outside4huan):
-	pickups_list = dbscan.load_data(pickup_file)
+	pickups_list = load_data(pickup_file)
 
 	#dbscan the pickups which is inside4huan
 	pickups_list_inside4huan_trackid = []
@@ -75,13 +78,28 @@ def pickup_inside4huan_outside4huan_dbscan(pickup_file,e_inside4huan,minpts_insi
 
 
  
-pickup_filename = 'pickup_20121101_8-0_8-30.txt'
 pickup_dir = '/home/donghao/ITS_project/taxi_finder/data/data_pickup/pickup_according_time/'
+time_interval_user_defined_timestamp = time.mktime(time.strptime('2012-11-1 00:30:00','%Y-%m-%d %H:%M:%S'))-time.mktime(time.strptime('2012-11-1 00:00:00','%Y-%m-%d %H:%M:%S'))
+time_interval_one_day_timestamp = time.mktime(time.strptime('2012-11-2 00:00:00','%Y-%m-%d %H:%M:%S'))-time.mktime(time.strptime('2012-11-1 00:00:00','%Y-%m-%d %H:%M:%S'))
+start_time_string = '2012-11-1 00:00:00'
+for i in range(int(time_interval_one_day_timestamp/time_interval_user_defined_timestamp)):
+	pickup_filename_prefix = 'pickup_20121101_'
+        start_time_timestamp = time.mktime(time.strptime(start_time_string,'%Y-%m-%d %H:%M:%S'))
+        end_time_timestamp = start_time_timestamp + time_interval_user_defined_timestamp
+        start_time_string = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(start_time_timestamp))
+	end_time_string = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(end_time_timestamp))
+        start_time_datetime = datetime.strptime(start_time_string,'%Y-%m-%d %H:%M:%S')
+	end_time_datetime = datetime.strptime(end_time_string,'%Y-%m-%d %H:%M:%S')
 
-pickup_file = pickup_dir + pickup_filename
-e_inside4huan = 0.3
-minpts_inside4huan = 4
-e_outside4huan = 2
-minpts_outside4huan = 4
+	pickup_filename = pickup_filename_prefix + str(start_time_datetime.hour) + '-' + str(start_time_datetime.minute) + '_' + str(end_time_datetime.hour) + '-' + str(end_time_datetime.minute) + '.txt'
+        pickup_file = pickup_dir + pickup_filename
+	if os.path.exists(pickup_file):
+		e_inside4huan = 0.3
+		minpts_inside4huan = 4
+		e_outside4huan = 2
+		minpts_outside4huan = 4
+		pickup_inside4huan_outside4huan_dbscan(pickup_file,e_inside4huan,minpts_inside4huan,e_outside4huan,minpts_outside4huan)
+	else:
+		break
+        start_time_string = end_time_string
 
-pickup_inside4huan_outside4huan_dbscan(pickup_file,e_inside4huan,minpts_inside4huan,e_outside4huan,minpts_outside4huan)
